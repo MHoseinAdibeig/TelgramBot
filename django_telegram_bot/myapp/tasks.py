@@ -6,10 +6,11 @@
 # from rest_framework.parsers import MultiPartParser, FormParser
 import os
 from django_telegram_bot.celery import app
-
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from celery import shared_task
 # from .models import Gadget, State, Analysis, SampleDetail, Result
+from .models import Tweet
 # from .analyser.MotilityGadget.semenAnalysis import semenAnalysis
 # @shared_task()
 @app.task(name="telegram_bot")
@@ -27,11 +28,12 @@ def sample_task():
             @dp.message_handler(commands=['uppercase'])
             async def uppercase_command(message: types.Message):
                 # Get the user's message
+                tweet = await sync_to_async(Tweet.objects.first)()
                 user_text = message.text[len('/uppercase '):]  # Remove the command part
                 # Convert to uppercase
                 uppercase_text = user_text.upper()
                 # Reply with the uppercase text
-                await message.reply(f"Uppercase: {uppercase_text}\nChat ID: {message.chat.id}\nUsername: {message.chat.username}")
+                await message.reply(f"Uppercase: {tweet.question}\nChat ID: {message.chat.id}\nUsername: {message.chat.username}")
 
             # Inline keyboard setup (similar to your existing code)
             button1 = InlineKeyboardButton(text="button1", callback_data="In_First_button")
